@@ -29,7 +29,7 @@ A Decky plugin that uses ChatGPT (GPT-4 Vision) to help you when you're stuck in
 - OpenAI API key with access to GPT-4o
 - Python dependencies (automatically installed):
   - openai >= 1.0.0
-  - pillow >= 10.0.0
+  - pillow >= 10.3.0
 
 ## Privacy & Security
 
