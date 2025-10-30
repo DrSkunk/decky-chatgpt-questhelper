@@ -1,10 +1,10 @@
 # ChatGPT Quest Helper
 
-A Decky plugin that uses ChatGPT (GPT-4 Vision) to help you when you're stuck in a game. Take a screenshot and let AI analyze it to provide step-by-step guidance on how to proceed with your quest.
+A Decky plugin that uses ChatGPT (GPT-4 Turbo Vision) to help you when you're stuck in a game. Take a screenshot and let AI analyze it to provide step-by-step guidance on how to proceed with your quest.
 
 ## Features
 
-- 🎮 AI-powered quest assistance using GPT-4o Vision
+- 🎮 AI-powered quest assistance using GPT-4 Turbo Vision
 - 📸 Automatic screenshot capture from Steam
 - 🔒 Secure API key storage
 - ⚡ Easy-to-use interface directly in Steam Deck's quick access menu
@@ -26,7 +26,7 @@ A Decky plugin that uses ChatGPT (GPT-4 Vision) to help you when you're stuck in
 
 ## Requirements
 
-- OpenAI API key with access to GPT-4o
+- OpenAI API key with access to GPT-4 Turbo
 - Python dependencies (automatically installed):
   - openai >= 1.0.0
   - pillow >= 10.3.0

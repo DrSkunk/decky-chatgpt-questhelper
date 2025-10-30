@@ -182,7 +182,7 @@ class Plugin:
             # Call OpenAI API
             decky.logger.info("Calling OpenAI API for quest help...")
             response = await self.openai_client.chat.completions.create(
-                model="gpt-4o",  # Using gpt-4o which supports vision
+                model="gpt-4-turbo",  # Using gpt-4-turbo which supports vision
                 messages=messages,
                 max_tokens=500
             )
