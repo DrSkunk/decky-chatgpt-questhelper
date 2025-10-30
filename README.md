@@ -1,4 +1,45 @@
-# Decky Plugin Template [![Chat](https://img.shields.io/badge/chat-on%20discord-7289da.svg)](https://deckbrew.xyz/discord)
+# ChatGPT Quest Helper
+
+A Decky plugin that uses ChatGPT (GPT-4 Vision) to help you when you're stuck in a game. Take a screenshot and let AI analyze it to provide step-by-step guidance on how to proceed with your quest.
+
+## Features
+
+- 🎮 AI-powered quest assistance using GPT-4o Vision
+- 📸 Automatic screenshot capture from Steam
+- 🔒 Secure API key storage
+- ⚡ Easy-to-use interface directly in Steam Deck's quick access menu
+
+## Setup
+
+1. Install the plugin via Decky Loader
+2. Get an OpenAI API key from [OpenAI Platform](https://platform.openai.com/api-keys)
+3. Open the plugin and navigate to Settings
+4. Enter your OpenAI API key and click "Save API Key"
+
+## Usage
+
+1. When stuck in a game, take a screenshot using Steam's screenshot feature (Steam button + R1)
+2. Open the Decky quick access menu
+3. Navigate to the ChatGPT Quest Helper plugin
+4. Click "Get Help with Quest"
+5. Wait for the AI to analyze your screenshot and provide guidance
+
+## Requirements
+
+- OpenAI API key with access to GPT-4o
+- Python dependencies (automatically installed):
+  - openai >= 1.0.0
+  - pillow >= 10.0.0
+
+## Privacy & Security
+
+- Your API key is stored locally on your Steam Deck
+- Screenshots are sent to OpenAI for analysis (subject to OpenAI's privacy policy)
+- No data is stored by the plugin beyond the API key
+
+---
+
+## Development
 
 Reference example for using [decky-frontend-lib](https://github.com/SteamDeckHomebrew/decky-frontend-lib) (@decky/ui) in a [decky-loader](https://github.com/SteamDeckHomebrew/decky-loader) plugin.
 
