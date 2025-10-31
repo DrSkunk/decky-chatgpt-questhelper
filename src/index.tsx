@@ -2,114 +2,194 @@ import {
   ButtonItem,
   PanelSection,
   PanelSectionRow,
-  Navigation,
+  TextField,
   staticClasses
 } from "@decky/ui";
 import {
-  addEventListener,
-  removeEventListener,
   callable,
   definePlugin,
   toaster,
-  // routerHook
 } from "@decky/api"
-import { useState } from "react";
-import { FaShip } from "react-icons/fa";
+import { useState, useEffect } from "react";
+import { FaQuestionCircle } from "react-icons/fa";
 
-// import logo from "../assets/logo.png";
+// Define the response type from the backend
+interface QuestHelpResponse {
+  success: boolean;
+  help_text?: string;
+  error?: string;
+}
 
-// This function calls the python function "add", which takes in two numbers and returns their sum (as a number)
-// Note the type annotations:
-//  the first one: [first: number, second: number] is for the arguments
-//  the second one: number is for the return value
-const add = callable<[first: number, second: number], number>("add");
-
-// This function calls the python function "start_timer", which takes in no arguments and returns nothing.
-// It starts a (python) timer which eventually emits the event 'timer_event'
-const startTimer = callable<[], void>("start_timer");
+// Callable functions for the backend
+const requestQuestHelp = callable<[], QuestHelpResponse>("request_quest_help");
+const setApiKey = callable<[apiKey: string], boolean>("set_api_key");
+const getApiKey = callable<[], string>("get_api_key");
 
 function Content() {
-  const [result, setResult] = useState<number | undefined>();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [helpText, setHelpText] = useState<string>("");
+  const [apiKey, setApiKeyState] = useState<string>("");
+  const [hasApiKey, setHasApiKey] = useState<boolean>(false);
 
-  const onClick = async () => {
-    const result = await add(Math.random(), Math.random());
-    setResult(result);
+  // Load API key on mount
+  useEffect(() => {
+    const loadApiKey = async () => {
+      try {
+        const key = await getApiKey();
+        if (key && key.length > 0) {
+          setApiKeyState(key);
+          setHasApiKey(true);
+        }
+      } catch (error) {
+        console.error("Failed to load API key:", error);
+      }
+    };
+    loadApiKey();
+  }, []);
+
+  const handleQuestHelp = async () => {
+    setIsLoading(true);
+    setHelpText("");
+    
+    try {
+      const response = await requestQuestHelp();
+      
+      if (response.success && response.help_text) {
+        setHelpText(response.help_text);
+        toaster.toast({
+          title: "Quest Help Received!",
+          body: "Check the plugin for guidance."
+        });
+      } else {
+        const errorMsg = response.error || "Unknown error occurred";
+        setHelpText(`Error: ${errorMsg}`);
+        toaster.toast({
+          title: "Quest Help Failed",
+          body: errorMsg
+        });
+      }
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : "Unknown error";
+      setHelpText(`Error: ${errorMsg}`);
+      toaster.toast({
+        title: "Quest Help Failed",
+        body: errorMsg
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSaveApiKey = async () => {
+    if (!apiKey || apiKey.trim().length === 0) {
+      toaster.toast({
+        title: "Invalid API Key",
+        body: "Please enter a valid OpenAI API key"
+      });
+      return;
+    }
+
+    try {
+      const success = await setApiKey(apiKey.trim());
+      if (success) {
+        setHasApiKey(true);
+        toaster.toast({
+          title: "API Key Saved",
+          body: "Your OpenAI API key has been saved successfully"
+        });
+      } else {
+        toaster.toast({
+          title: "Failed to Save",
+          body: "Could not save the API key"
+        });
+      }
+    } catch (error) {
+      toaster.toast({
+        title: "Error",
+        body: "Failed to save API key"
+      });
+    }
   };
 
   return (
-    <PanelSection title="Panel Section">
-      <PanelSectionRow>
-        <ButtonItem
-          layout="below"
-          onClick={onClick}
-        >
-          {result ?? "Add two numbers via Python"}
-        </ButtonItem>
-      </PanelSectionRow>
-      <PanelSectionRow>
-        <ButtonItem
-          layout="below"
-          onClick={() => startTimer()}
-        >
-          {"Start Python timer"}
-        </ButtonItem>
-      </PanelSectionRow>
+    <>
+      <PanelSection title="Settings">
+        <PanelSectionRow>
+          <TextField
+            label="OpenAI API Key"
+            value={apiKey}
+            onChange={(e) => setApiKeyState(e.target.value)}
+          />
+        </PanelSectionRow>
+        <PanelSectionRow>
+          <ButtonItem
+            layout="below"
+            onClick={handleSaveApiKey}
+            disabled={!apiKey || apiKey.trim().length === 0}
+          >
+            Save API Key
+          </ButtonItem>
+        </PanelSectionRow>
+      </PanelSection>
 
-      {/* <PanelSectionRow>
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <img src={logo} />
-        </div>
-      </PanelSectionRow> */}
-
-      {/*<PanelSectionRow>
-        <ButtonItem
-          layout="below"
-          onClick={() => {
-            Navigation.Navigate("/decky-plugin-test");
-            Navigation.CloseSideMenus();
-          }}
-        >
-          Router
-        </ButtonItem>
-      </PanelSectionRow>*/}
-    </PanelSection>
+      <PanelSection title="Quest Helper">
+        <PanelSectionRow>
+          <ButtonItem
+            layout="below"
+            onClick={handleQuestHelp}
+            disabled={!hasApiKey || isLoading}
+          >
+            {isLoading ? "Analyzing..." : "Get Help with Quest"}
+          </ButtonItem>
+        </PanelSectionRow>
+        
+        {helpText && (
+          <PanelSectionRow>
+            <div style={{ 
+              padding: "10px", 
+              backgroundColor: "rgba(0, 0, 0, 0.3)", 
+              borderRadius: "5px",
+              whiteSpace: "pre-wrap",
+              wordWrap: "break-word",
+              maxHeight: "300px",
+              overflowY: "auto"
+            }}>
+              {helpText}
+            </div>
+          </PanelSectionRow>
+        )}
+        
+        {!hasApiKey && (
+          <PanelSectionRow>
+            <div style={{ 
+              padding: "10px", 
+              color: "#ff6b6b",
+              fontSize: "0.9em"
+            }}>
+              ⚠️ Please configure your OpenAI API key in Settings first
+            </div>
+          </PanelSectionRow>
+        )}
+      </PanelSection>
+    </>
   );
 };
 
 export default definePlugin(() => {
-  console.log("Template plugin initializing, this is called once on frontend startup")
-
-  // serverApi.routerHook.addRoute("/decky-plugin-test", DeckyPluginRouterTest, {
-  //   exact: true,
-  // });
-
-  // Add an event listener to the "timer_event" event from the backend
-  const listener = addEventListener<[
-    test1: string,
-    test2: boolean,
-    test3: number
-  ]>("timer_event", (test1, test2, test3) => {
-    console.log("Template got timer_event with:", test1, test2, test3)
-    toaster.toast({
-      title: "template got timer_event",
-      body: `${test1}, ${test2}, ${test3}`
-    });
-  });
+  console.log("ChatGPT Quest Helper plugin initializing")
 
   return {
     // The name shown in various decky menus
-    name: "Test Plugin",
+    name: "Quest Helper",
     // The element displayed at the top of your plugin's menu
-    titleView: <div className={staticClasses.Title}>Decky Example Plugin</div>,
+    titleView: <div className={staticClasses.Title}>ChatGPT Quest Helper</div>,
     // The content of your plugin's menu
     content: <Content />,
     // The icon displayed in the plugin list
-    icon: <FaShip />,
+    icon: <FaQuestionCircle />,
     // The function triggered when your plugin unloads
     onDismount() {
-      console.log("Unloading")
-      removeEventListener("timer_event", listener);
-      // serverApi.routerHook.removeRoute("/decky-plugin-test");
+      console.log("ChatGPT Quest Helper unloading")
     },
   };
 });
